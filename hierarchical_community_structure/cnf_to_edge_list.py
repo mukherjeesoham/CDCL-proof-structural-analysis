@@ -20,16 +20,46 @@ def read_file(file):
 
 
 def cnf_to_edge_list(clauses):
-	edge_list = []
-	for clause in clauses:
-		for i in range(len(clause)-1):
-			for j in range(i+1, len(clause)):
-				edge_list.append([abs(int(clause[i]))-1, abs(int(clause[j]))-1])
-	edge_set = set(map(frozenset, edge_list))
-	return edge_set
+        edge_list = []
+        for clause in clauses:
+                for i in range(len(clause)-1):
+                        for j in range(i+1, len(clause)):
+                                edge_list.append([abs(int(clause[i]))-1, abs(int(clause[j]))-1])
+        edge_set = set(map(frozenset, edge_list))
+        return edge_set
 
-# import itertools
+# SM: Adding code to test cnf_to_edge_list, and then extending the function
+# to compute a weighted adjacency matrix.   
+from itertools import combinations
+from collections import Counter
 
+def clause_to_edge_set(clause):
+    return set(combinations(clause, 2))
+
+def cnf_to_edge_set(clauses)
+    edge_set = set()
+    for clause in clauses:
+        edge_set = edge_set | clause_to_edge_set(clause) 
+    return edge_set 
+
+def cnf_to_edge_dict_weighted(clauses)
+    # TODO: Think of other definitions for edge weights; for example, 
+    # the simple association index.
+    edge_list = list()
+    for clause in clauses:
+        edge_list = edge_list + list(clause_to_edge_set(clause)) 
+    return dict(Counter(edge_set))
+
+def cnf_to_weighted_graph(clauses)
+    G = list()
+    for (key, value) in cnf_to_edge_dict_weighted(clauses):
+        source = key[1]
+        target = key[2]
+        weight = value
+        G = G + [(source, target, weight)]
+    return igraph.Graph.TupleList(G, edge_attrs="weight")
+        
+        
 
 
 
