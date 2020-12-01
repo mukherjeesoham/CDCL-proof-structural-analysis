@@ -3,6 +3,7 @@ from collections import Counter
 import igraph
 
 def parse(path):
+    # FIXME: Close the file somewhere? 
     f = open(path).read()
     g = f.split("\n")[1:-1]  
     h = list(map(lambda x: x.strip("0 "), g)) 
@@ -60,4 +61,3 @@ def compute_modularity(dendogram):
         vertex["modularity"] =  igraph.Graph.modularity(vertex["graph"], 
                                 vertex["graph"].community_multilevel()) 
     return dendogram
-        
