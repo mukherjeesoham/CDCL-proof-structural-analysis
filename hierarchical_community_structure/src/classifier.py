@@ -93,6 +93,6 @@ classifiers = [
     GaussianNB()
 ]
 
-data = collate(load("../datasets/pickle"), hardness)
-classifier(data, "Category")
+# data = collate(load("../datasets/pickle"), hardness)
+# classifier(data, "Category")
 
