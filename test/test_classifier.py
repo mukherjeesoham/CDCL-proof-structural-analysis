@@ -4,7 +4,8 @@
 #-----------------------------------------------------
 
 import pytest
-import classifier as cls
+# FIXME: Add path
+import SATclassifier as cls
 import numpy as np
 
 

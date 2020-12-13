@@ -73,6 +73,28 @@ def classifier(dataframe, label):
         scores   = cross_val_score(clf, scaledfeatures, labels, cv=10)
         print(str(clf) + " : Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
 
+
+def colour(labels):
+    colours = {0 : "r", 1 : "b", 2 : "g", 3 : "c", 4 : "k"}
+    return list(map(lambda x : colours[x], labels))
+
+def tSNE(dataframe, label):
+    perplexity = [20, 30, 40, 50]
+    # Modifications to test individual classes/categories
+    # dataframe = dataframe[dataframe["Category"] == 4]
+
+    labels, features = extract(dataframe, label)
+    scaledfeatures = StandardScaler().fit_transform(features) 
+    projectedscaledfeatures = project(scaledfeatures, 50)  
+    fig = plt.figure(figsize=(20,4))
+
+    for (index, perp) in enumerate(perplexity):
+        features_embedded = TSNE(n_components=2, perplexity=perp, n_iter=5000).fit_transform(projectedscaledfeatures)
+        plt.subplot(1, 4, index+1)
+        plt.scatter(features_embedded[:,0], features_embedded[:,1], color=colour(labels))
+        plt.title(perp)
+    plt.show()
+
 #-----------------------------------------------------
 # Run on datasets
 #-----------------------------------------------------
@@ -93,6 +115,18 @@ classifiers = [
     GaussianNB()
 ]
 
-# data = collate(load("../datasets/pickle"), hardness)
-# classifier(data, "Category")
+# Compare classifier results against MNIST
+from sklearn import datasets, svm, metrics
+digits = datasets.load_digits()
+images_and_labels = list(zip(digits.images, digits.target))
+n_samples = len(digits.images)
+data = digits.images.reshape((n_samples, -1))
+for clf in classifiers:
+    scores   = cross_val_score(clf, data, digits.target, cv=5)
+    print(str(clf) + " : Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+
+data = collate(load("../../datasets/pickle"), hardness)
+classifier(data, "Category")
+print("----------------------------------")
+classifier(data, "Hardness")
 
