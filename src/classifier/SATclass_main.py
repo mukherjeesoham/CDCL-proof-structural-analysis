@@ -7,7 +7,7 @@
 # - build a classifier that classifies a SAT instance (within a particular) family as easy or hard?
 #-----------------------------------------------------
 
-from SATclass_utils import collate, load, classifier, process, extractfeatures, extractlabels, KNN, RF  
+from SATclass_utils import collate, load, classifier, process, KNN, RF, extractfeatures, extractlabels 
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -33,10 +33,6 @@ from sklearn.inspection import permutation_importance
 def classify(filename):
     print("Using dataset {}".format(filename))
     localdata = collate(load("../../datasets/{}".format(filename)))
-    # Look at only SAT instances
-    # FIXME: Why are we getting different set of datapoints
-    #        everytime we run the solver?
-    localdata = localdata[localdata.SAT.eq(1)]
 
     print("----------------------------------")
     print("Classification results for Category")
@@ -50,7 +46,7 @@ def classify(filename):
 #-----------------------------------------------------
 # Do a classification for all categories together
 #-----------------------------------------------------
-classify("pickle_31_01_2021/ALL")
+classify("pickle_13_02_2021/ALL")
 
 #-----------------------------------------------------
 # Do a classification for categories separately
@@ -61,7 +57,7 @@ ALL, SAT, UNSAT, UNKWN = process("pickle_31_01_2021/ALL")
 # Check if the dataset is balanced or not. They grossly
 # aren't. The best we can do at the moment is to use the whole dataset for category
 # and run hardness classifier for SAT instances 
-if (1):
+if (0):
 	print("\nAre the datasets balanced for category?")
 	print("ALL\t {}".format(np.unique(ALL.Category, 	return_counts=True)))
 	print("SAT\t {}".format(np.unique(SAT.Category, 	return_counts=True)))
@@ -80,10 +76,8 @@ if (1):
 
 F    = extractfeatures(ALL)
 L    = extractlabels(ALL)
-FSAT = extractfeatures(SAT)
-LSAT = extractlabels(SAT)
 
-if (1): 
+if (0): 
     # Run a test classifier for category
     print("\nCategory")
     RF(F, L["Category"], 1)
@@ -96,35 +90,35 @@ if (1):
     print("SAT/UNSAT")
     RF(F, L["SAT"], 1)
 
-if (1):
+for i in range(5):
     # Feature importance using permutation importance
     clf = RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1) 
     
     # Look at the confusion matrix for category
-    cftrain, cftest, cltrain, cltest = train_test_split(F, L["Category"], random_state=0)
-    clf.fit(cftrain, cltrain)
-    print("\n--------------------------------")
-    print("Category")
-    print("--------------------------------")
-    print("RF train accuracy: %0.3f" % clf.score(cftrain, cltrain))
-    print("RF test accuracy: %0.3f" % clf.score(cftest, cltest))
+    # cftrain, cftest, cltrain, cltest = train_test_split(F, L["Category"], random_state=0)
+    # clf.fit(cftrain, cltrain)
+    # print("\n--------------------------------")
+    # print("Category")
+    # print("--------------------------------")
+    # print("RF train accuracy: %0.3f" % clf.score(cftrain, cltrain))
+    # print("RF test accuracy: %0.3f" % clf.score(cftest, cltest))
     # plot_confusion_matrix(clf, cftest, cltest)  
     # plt.show()  
     
     # Look at permutation importance
-    result = permutation_importance(clf, cftest, cltest, n_repeats=10, random_state=42, n_jobs=2)
-    sorted_idx  = result.importances_mean.argsort()
-    topfeatures = F.columns[sorted_idx].to_numpy()
-    print(topfeatures[:5])
+    # result = permutation_importance(clf, cftest, cltest, n_repeats=10, random_state=42, n_jobs=2)
+    # sorted_idx  = result.importances_mean.argsort()
+    # topfeatures = F.columns[sorted_idx].to_numpy()
+    # print(topfeatures[:5])
     
     # Look at the confusion matrix for hardness
     hftrain, hftest, hltrain, hltest = train_test_split(F, L["Hardness"], random_state=0)
     clf.fit(hftrain, hltrain)
-    print("\n--------------------------------")
-    print("Hardness")
-    print("--------------------------------")
-    print("RF train accuracy: %0.3f" % clf.score(hftrain, hltrain))
-    print("RF test accuracy: %0.3f" % clf.score(hftest, hltest))
+    # print("\n--------------------------------")
+    # print("Hardness")
+    # print("--------------------------------")
+    # print("RF train accuracy: %0.3f" % clf.score(hftrain, hltrain))
+    # print("RF test accuracy: %0.3f" % clf.score(hftest, hltest))
     # plot_confusion_matrix(clf, hftest, hltest)  
     # plt.show()
     
@@ -133,7 +127,7 @@ if (1):
     topfeatures = F.columns[sorted_idx].to_numpy()
     print(topfeatures[:5])
 
-if(1):
+if(0):
     print("\nStarting computations for drop-feature importance.\n")
     # Find out the top 5 features that predict Category using drop feature importance
     QC = Parallel(n_jobs=4, verbose=1, prefer="threads")(delayed(RF)(F.filter(F5), L["Category"]) for F5 in list(combinations(F, 5)))

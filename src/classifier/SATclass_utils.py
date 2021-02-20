@@ -43,6 +43,7 @@ def load(path):
 
 def collate(dictionary):
     # NOTE: We sample the minimum number of rows from each dataset.
+    # TODO: Switch minrows off if you don't want to do category classification.
     minrows = np.min([dataframe.shape[0] for dataframe in dictionary.values()])
     dataframe = pd.concat([addhardness(addcategory(dataframe.sample(minrows), ID)) 
                            for (ID, dataframe) in enumerate(dictionary.values())])
@@ -63,7 +64,7 @@ def addhardness(dataframe):
 
 def extract(dataframe, label):
     labels   = dataframe[label].values
-    features = dataframe.drop(["solvingTime", "Category", "Hardness"], axis=1)
+    features = dataframe.drop(["solvingTime", "Category", "Hardness", "SAT"], axis=1)
     return (labels, features.to_numpy(), features.columns)
 
 def project(features, dimension):
@@ -109,15 +110,6 @@ def compareMNIST():
         print(scores)
         print(str(clf) + " : Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
 
-# Update features and labels here
-features  = ["numVars", "numClauses", "cvr", "leafCommunity", "rootInterVars", "rootInterEdges",
-     	    "rootInterVars/rootCommunitySize", "rootInterEdges/rootInterVars", "rootInterEdges/rootCommunitySize",
-     	    "total_leaves/total_communities", "aveLeafDepth", "numLeaves", "dvMean", "dvVariance", "degreeMean",
-     	    "degreeVariance"] # Removed SAT and rootInterEdges/rootInterVars
-labels    = ["SAT", "Category", "Hardness"]
-regressor = ["solvingTime"]
-debug     = 0
-
 def process(filename):
 	dataframe = collate(load("../../datasets/{}".format(filename)))
 	ALL   = dataframe 
@@ -127,7 +119,7 @@ def process(filename):
 	return ALL, SAT, UNSAT, UNKWN 
 
 def RF(features, label, debug=0):
-    scores = cross_val_score(KNeighborsClassifier(3), StandardScaler().fit_transform(features), label, cv=5)
+    scores = cross_val_score(KNeighborsClassifier(3), StandardScaler().fit_transform(features), label, cv=2)
     if debug == 1:
         print("\t balance ", np.unique(label, 	return_counts=True))
         print("\t scores ", scores)
@@ -135,7 +127,7 @@ def RF(features, label, debug=0):
     return (list(features.columns), scores.mean(), scores.std()*2)
 
 def KNN(features, label, debug=0):
-    scores = cross_val_score(RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1), StandardScaler().fit_transform(features), label, cv=5)
+    scores = cross_val_score(RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1), StandardScaler().fit_transform(features), label, cv=2)
     if debug == 1:
         print("\t balance ", np.unique(label, 	return_counts=True))
         print("\t scores ", scores)
@@ -143,7 +135,7 @@ def KNN(features, label, debug=0):
     return (list(features.columns), scores.mean(), scores.std()*2)
 
 def extractfeatures(dataframe):
-	return dataframe.filter(features)
+    return dataframe.drop(["solvingTime", "Category", "Hardness", "SAT"], axis=1)
 
 def extractlabels(dataframe):
-	return dataframe.filter(labels)
+    return dataframe.filter(["solvingTime", "Category", "Hardness", "SAT"], axis=1)
