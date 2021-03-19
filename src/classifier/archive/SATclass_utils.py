@@ -48,7 +48,7 @@ def collate(dictionary):
     dataframe = pd.concat([addhardness(addcategory(dataframe.sample(minrows), ID)) 
                            for (ID, dataframe) in enumerate(dictionary.values())])
     # Drop "rootInterEdges/rootInterVars" since it's computed incorrectly
-    dataframe = dataframe.drop(['rootInterEdges/rootInterVars'], axis=1) 
+    # dataframe = dataframe.drop(['rootInterEdges/rootInterVars'], axis=1) 
     return dataframe 
 
 def addcategory(dataframe, ID):
@@ -75,12 +75,7 @@ def classifier(dataframe, label):
                    RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1)]
     labels, features, columnheaders = extract(dataframe, label)
     scaledfeatures = StandardScaler().fit_transform(features) 
-    print("Balance: {}".format(np.unique(labels, return_counts=True)))
-
-    for clf in classifiers:
-        scores = cross_val_score(clf, scaledfeatures, labels, cv=5)
-        print("\t", scores)
-        print(str(clf) + " : Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+    # print("Balance: {}".format(np.unique(labels, return_counts=True%0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
 
 def colour(labels):
     colours = {0 : "r", 1 : "b", 2 : "g", 3 : "c", 4 : "k", 5 : "y", 6 : "m", 7 : "tab:orange"}
