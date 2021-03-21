@@ -38,6 +38,11 @@ def preprocess(dataframe):
     dataframe.drop(dataframe[dataframe.solvingTime == 0.0].index, inplace=True)     # NEW: Remove instances with solving time of zero.
     return dataframe
 
+def adjustedR2(features, R2):
+    (n, k) = np.shape(features)
+    return 1 - (1 - R2) * (n - 1) / (n - k - 1)
+
+
 def RFRegressor(dataframe):
     reg      = RandomForestRegressor()                                              # NEW: If you don't know what hyperparameters are good, don't set any of them.
     scaler   = preprocessing.StandardScaler()
@@ -49,6 +54,7 @@ def RFRegressor(dataframe):
     reg.fit(rftrain, rltrain)
     print("\t RF regressor train accuracy: %0.3f" % reg.score(rftrain, rltrain))
     print("\t RF regressor test accuracy: %0.3f" % reg.score(rftest, rltest))
+    print("\t RF regressor adjusted R2: %0.3f" % adjustedR2(features, reg.score(rftest, rltest)))
        
     if (0):
         plt.scatter(rltest, reg.predict(rftest), s=6)
